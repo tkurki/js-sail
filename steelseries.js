@@ -89,7 +89,8 @@ var steelseries = (function () {
         function CompassBackground(size) {
             var buffer = createBuffer(size, size);
             var portAndStbrdBuffers = [createBuffer(size, size), createBuffer(size, size)];
-            var degreeScale = true;
+            var degreeScale = false;
+            var roseVisible = false;
             var imageWidth = size;
             var imageHeight = size;
             var angleStep = RAD_FACTOR;
