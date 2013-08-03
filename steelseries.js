@@ -49,6 +49,8 @@ var steelseries = (function () {
         var initialized = false;
 
         var heading = 45;
+        var portActual = 50;
+        var stbrdActual = 135;
         var portAndStbrdSections = [
             section(10,30, steelseries.ColorDef.RED.veryLight.getHexColor()),
             section(60,75, steelseries.ColorDef.GREEN.veryLight.getHexColor())
@@ -86,7 +88,7 @@ var steelseries = (function () {
 
         function CompassBackground(size) {
             var buffer = createBuffer(size, size);
-            var localCtx = buffer.getContext('2d');
+            var portAndStbrdBuffers = [createBuffer(size, size), createBuffer(size, size)];
             var degreeScale = true;
             var imageWidth = size;
             var imageHeight = size;
@@ -277,6 +279,7 @@ var steelseries = (function () {
                 }
             }
 
+
             var to0to359 = function (value) {
                 while (value < 0) {
                     value = value + 360;
@@ -323,12 +326,20 @@ var steelseries = (function () {
             return {
               init : function() {
 //                  drawRoseImage(localCtx, size / 2, size / 2, size, size, steelseries.BackgroundColor.DARK_GRAY);
-                  drawTickmarksImage(localCtx);
+                  drawTickmarksImage(buffer.getContext('2d'));
+                  drawPointerImage(portAndStbrdBuffers[0].getContext('2d'), size, steelseries.PointerType.TYPE1, steelseries.ColorDef.RED, backgroundColor.labelColor);
+                  drawPointerImage(portAndStbrdBuffers[1].getContext('2d'), size, steelseries.PointerType.TYPE8, steelseries.ColorDef.GREEN, backgroundColor.labelColor);
               },
               draw: function() {
                   preRotate(getAngle(-heading));
                   drawSections(portAndStbrdSections);
                   mainCtx.drawImage(buffer, 0, 0);
+                  preRotate(getAngle(portActual));
+                  mainCtx.drawImage(portAndStbrdBuffers[0], 0, 0);
+                  mainCtx.restore()
+                  preRotate(getAngle(stbrdActual));
+                  mainCtx.drawImage(portAndStbrdBuffers[1], 0, 0);
+                  mainCtx.restore();
                   mainCtx.restore();
               }
             }
@@ -393,9 +404,16 @@ var steelseries = (function () {
             this.repaint();
         }
 
-        this.setPortSector = function(start, stop) {
+        this.setPortSector = function(start, stop, actual) {
             portAndStbrdSections[0].start = start;
             portAndStbrdSections[0].stop = stop;
+            portActual = actual;
+        }
+
+        this.setStarboardSector = function(start, stop, actual) {
+            portAndStbrdSections[1].start = start;
+            portAndStbrdSections[1].stop = stop;
+            stbrdActual = actual;
         }
 
 

@@ -33,7 +33,8 @@
             direction = direction +1;
             compass.setValue(direction);
             sailingGauge.setHeading(direction);
-            sailingGauge.setPortSector( -1 *  (10 + direction), -1 *  (10 + direction *0.9) );
+            sailingGauge.setPortSector( -1 *  (10 + direction), -1 *  (10 + direction *0.9), -1 *  (10 + direction) +2 );
+            sailingGauge.setStarboardSector( 10 + direction, 10 + direction *1.2, 11 + direction);
         }, 1000);
     }
 
