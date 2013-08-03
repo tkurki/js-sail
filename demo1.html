@@ -32,7 +32,8 @@
         setInterval(function(){
             direction = direction +1;
             compass.setValue(direction);
-            sailingGauge.setHeading(45 - direction);
+            sailingGauge.setHeading(direction);
+            sailingGauge.setPortSector(direction - (10 + direction / 10), direction - (10 + direction / 20) );
         }, 1000);
     }
 

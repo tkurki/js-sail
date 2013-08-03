@@ -49,6 +49,10 @@ var steelseries = (function () {
         var initialized = false;
 
         var heading = 45;
+        var portAndStbrdSections = [
+            section(10,30, steelseries.ColorDef.RED.veryLight.getHexColor()),
+            section(60,75, steelseries.ColorDef.GREEN.veryLight.getHexColor())
+        ]
 
         var backgroundColor = steelseries.BackgroundColor.DARK_GRAY;
 
@@ -80,7 +84,6 @@ var steelseries = (function () {
 
         };
 
-
         function CompassBackground(size) {
             var buffer = createBuffer(size, size);
             var localCtx = buffer.getContext('2d');
@@ -88,6 +91,10 @@ var steelseries = (function () {
             var imageWidth = size;
             var imageHeight = size;
             var angleStep = RAD_FACTOR;
+            var angleRange = TWO_PI;
+            var rotationOffset = HALF_PI * -1;
+            var range = 360;
+            var minValue = 0;
             var pointSymbolsVisible = true;
             var pointSymbols = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
@@ -264,26 +271,87 @@ var steelseries = (function () {
                        ctx.restore();
                    };
 
+            var drawSections = function(sections) {
+                for (var i=0;i < sections.length;i++) {
+                  drawAreaSectionImage(mainCtx, sections[i].start, sections[i].stop, sections[i].color, true);
+                }
+            }
+
+            var to0to359 = function (value) {
+                while (value < 0) {
+                    value = value + 360;
+                }
+                while (value > 359) {
+                    value = value - 360
+                }
+                return value;
+            }
+
+            var drawAreaSectionImage = function (ctx, start, stop, color, filled) {
+               start = to0to359(start);
+                stop = to0to359(stop);
+                if (start > stop ) {
+                    _tmp = start; start = stop; stop = _tmp;
+                }
+                ctx.save();
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = imageWidth * 0.035;
+                var startAngle = (angleRange / range * start - angleRange / range * minValue);
+                var stopAngle = startAngle + (stop - start) / (range / angleRange);
+                ctx.translate(centerX, centerY);
+                ctx.rotate(rotationOffset);
+                ctx.beginPath();
+                if (filled) {
+                    ctx.moveTo(0, 0);
+                    ctx.arc(0, 0, imageWidth * 0.365 - ctx.lineWidth / 2, startAngle, stopAngle, false);
+                } else {
+                    ctx.arc(0, 0, imageWidth * 0.365, startAngle, stopAngle, false);
+                }
+    //            ctx.closePath();
+                if (filled) {
+                    ctx.moveTo(0, 0);
+                    ctx.fill();
+                } else {
+                    ctx.stroke();
+                }
+
+                ctx.translate(-centerX, -centerY);
+                ctx.restore();
+            };
 
             return {
               init : function() {
 //                  drawRoseImage(localCtx, size / 2, size / 2, size, size, steelseries.BackgroundColor.DARK_GRAY);
                   drawTickmarksImage(localCtx);
-
               },
               draw: function() {
-                  preRotate(getAngle(heading));
+                  preRotate(getAngle(-heading));
+                  drawSections(portAndStbrdSections);
                   mainCtx.drawImage(buffer, 0, 0);
                   mainCtx.restore();
               }
             }
+        };
 
+        function VesselPointer(size) {
+            var buffer = createBuffer(size, size);
+            var localCtx = buffer.getContext('2d');
+
+            return {
+              init : function() {
+                  drawPointerImage(localCtx, size, steelseries.PointerType.TYPE8, steelseries.ColorDef.GRAY, backgroundColor.labelColor);
+              },
+              draw: function() {
+                  mainCtx.drawImage(buffer, 0, 0);
+              }
+            }
         };
 
         var preRotate = function(angle) {
             mainCtx.save();
             mainCtx.translate(centerX, centerY);
-            mainCtx.rotate(-angle);
+            mainCtx.rotate(angle);
             mainCtx.translate(-centerX, -centerY);
         }
 
@@ -291,11 +359,11 @@ var steelseries = (function () {
           return HALF_PI + value * angleStep - HALF_PI;
         }
 
-
         var layers = [
             new Frame(size),
             new Background(size),
-            new CompassBackground(size)
+            new CompassBackground(size),
+            new VesselPointer(size)
 
         ];
 
@@ -323,6 +391,11 @@ var steelseries = (function () {
         this.setHeading = function(value) {
             heading = value;
             this.repaint();
+        }
+
+        this.setPortSector = function(start, stop) {
+            portAndStbrdSections[0].start = start;
+            portAndStbrdSections[0].stop = stop;
         }
 
 
