@@ -57,9 +57,25 @@ var steelseries = (function () {
 
         };
 
+        function Background(size) {
+            var buffer = createBuffer(size, size);
+            var localCtx = buffer.getContext('2d');
+            return {
+              init : function() {
+                  drawRadialBackgroundImage(localCtx, steelseries.BackgroundColor.DARK_GRAY, size / 2, size / 2, size, size);
+              },
+              draw: function() {
+                  mainCtx.drawImage(buffer, 0, 0);
+              }
+            }
+
+        };
+
 
         var layers = [
-            new Frame(size)
+            new Frame(size),
+            new Background(size)
+
         ];
 
 
