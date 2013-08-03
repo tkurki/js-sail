@@ -28,9 +28,11 @@
             pointSymbolsVisible: true
                                     });
         sailingGauge = new steelseries.SailingGauge('sailingGauge', {});
+
         setInterval(function(){
             direction = direction +1;
             compass.setValue(direction);
+            sailingGauge.setHeading(45 - direction);
         }, 1000);
     }
 

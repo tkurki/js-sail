@@ -39,16 +39,25 @@ var steelseries = (function () {
         var mainCtx = doc.getElementById(id).getContext('2d');
         var gaugeType = steelseries.GaugeType.TYPE4;
         var size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
+        var centerX = size /2;
+        var centerY = size /2;
+        var angleStep = RAD_FACTOR;
+
         mainCtx.canvas.width = size;
         mainCtx.canvas.height = size;
+
         var initialized = false;
+
+        var heading = 45;
+
+        var backgroundColor = steelseries.BackgroundColor.DARK_GRAY;
 
         function Frame(size) {
             var buffer = createBuffer(size, size);
             var localCtx = buffer.getContext('2d');
             return {
               init : function() {
-                drawRadialFrameImage(localCtx, steelseries.FrameDesign.METAL, size / 2, size / 2, size, size);
+                drawRadialFrameImage(localCtx, backgroundColor, size / 2, size / 2, size, size);
               },
               draw: function() {
                   mainCtx.drawImage(buffer, 0, 0);
@@ -62,7 +71,7 @@ var steelseries = (function () {
             var localCtx = buffer.getContext('2d');
             return {
               init : function() {
-                  drawRadialBackgroundImage(localCtx, steelseries.BackgroundColor.DARK_GRAY, size / 2, size / 2, size, size);
+                  drawRadialBackgroundImage(localCtx, backgroundColor, size / 2, size / 2, size, size);
               },
               draw: function() {
                   mainCtx.drawImage(buffer, 0, 0);
@@ -72,9 +81,221 @@ var steelseries = (function () {
         };
 
 
+        function CompassBackground(size) {
+            var buffer = createBuffer(size, size);
+            var localCtx = buffer.getContext('2d');
+            var degreeScale = true;
+            var imageWidth = size;
+            var imageHeight = size;
+            var angleStep = RAD_FACTOR;
+            var pointSymbolsVisible = true;
+            var pointSymbols = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+
+            var drawTickmarksImage = function (ctx) {
+                       var val;
+                       ctx.textAlign = 'center';
+                       ctx.textBaseline = 'middle';
+
+                       var stdFont, smlFont, i;
+
+                       ctx.save();
+                       ctx.strokeStyle = backgroundColor.labelColor.getRgbaColor();
+                       ctx.fillStyle = backgroundColor.labelColor.getRgbaColor();
+                       ctx.translate(centerX, centerY);
+
+                       if (!degreeScale) {
+
+                           stdFont = 0.12 * imageWidth + 'px serif';
+                           smlFont = 0.06 * imageWidth + 'px serif';
+
+                           for (i = 0; 360 > i; i += 2.5) {
+
+                               if (0 === i % 5) {
+                                   ctx.lineWidth = 1;
+                                   ctx.beginPath();
+                                   ctx.moveTo(imageWidth * 0.38, 0);
+                                   ctx.lineTo(imageWidth * 0.36, 0);
+                                   ctx.closePath();
+                                   ctx.stroke();
+                               }
+
+                               // Draw the labels
+                               ctx.save();
+                               switch (i) {
+                               case 0:
+                                   ctx.translate(imageWidth * 0.35, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = stdFont;
+                                   ctx.fillText(pointSymbols[2], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.35, 0);
+                                   break;
+                               case 45:
+                                   ctx.translate(imageWidth * 0.29, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = smlFont;
+                                   ctx.fillText(pointSymbols[3], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.29, 0);
+                                   break;
+                               case 90:
+                                   ctx.translate(imageWidth * 0.35, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = stdFont;
+                                   ctx.fillText(pointSymbols[4], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.35, 0);
+                                   break;
+                               case 135:
+                                   ctx.translate(imageWidth * 0.29, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = smlFont;
+                                   ctx.fillText(pointSymbols[5], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.29, 0);
+                                   break;
+                               case 180:
+                                   ctx.translate(imageWidth * 0.35, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = stdFont;
+                                   ctx.fillText(pointSymbols[6], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.35, 0);
+                                   break;
+                               case 225:
+                                   ctx.translate(imageWidth * 0.29, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = smlFont;
+                                   ctx.fillText(pointSymbols[7], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.29, 0);
+                                   break;
+                               case 270:
+                                   ctx.translate(imageWidth * 0.35, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = stdFont;
+                                   ctx.fillText(pointSymbols[0], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.35, 0);
+                                   break;
+                               case 315:
+                                   ctx.translate(imageWidth * 0.29, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = smlFont;
+                                   ctx.fillText(pointSymbols[1], 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.29, 0);
+                                   break;
+                               }
+                               ctx.restore();
+
+                               if (roseVisible && (0 === i || 22.5 === i || 45 === i || 67.5 === i || 90 === i || 112.5 === i || 135 === i || 157.5 === i || 180 === i || 202.5 === i || 225 === i || 247.5 === i || 270 === i || 292.5 === i || 315 === i || 337.5 === i || 360 === i)) {
+                                   // ROSE_LINE
+                                   ctx.save();
+                                   ctx.beginPath();
+                                   // indent the 16 half quadrant lines a bit for visual effect
+                                   if (i % 45) {
+                                       ctx.moveTo(imageWidth * 0.29, 0);
+                                   } else {
+                                       ctx.moveTo(imageWidth * 0.38, 0);
+                                   }
+                                   ctx.lineTo(imageWidth * 0.1, 0);
+                                   ctx.closePath();
+                                   ctx.restore();
+                                   ctx.lineWidth = 1;
+                                   ctx.strokeStyle = backgroundColor.symbolColor.getRgbaColor();
+                                   ctx.stroke();
+                               }
+                               ctx.rotate(angleStep * 2.5);
+                           }
+                       } else {
+                           stdFont = 0.08 * imageWidth + 'px serif';
+                           smlFont = imageWidth * 0.033 + 'px serif';
+
+                           ctx.rotate(angleStep * 10);
+
+                           for (i = 10; 360 >= i; i += 10) {
+                               // Draw the labels
+                               ctx.save();
+                               if (pointSymbolsVisible) {
+                                   switch (i) {
+                                   case 360:
+                                       ctx.translate(imageWidth * 0.35, 0);
+                                       ctx.rotate(HALF_PI);
+                                       ctx.font = stdFont;
+                                       ctx.fillText(pointSymbols[2], 0, 0, imageWidth);
+                                       ctx.translate(-imageWidth * 0.35, 0);
+                                       break;
+                                   case 90:
+                                       ctx.translate(imageWidth * 0.35, 0);
+                                       ctx.rotate(HALF_PI);
+                                       ctx.font = stdFont;
+                                       ctx.fillText(pointSymbols[4], 0, 0, imageWidth);
+                                       ctx.translate(-imageWidth * 0.35, 0);
+                                       break;
+                                   case 180:
+                                       ctx.translate(imageWidth * 0.35, 0);
+                                       ctx.rotate(HALF_PI);
+                                       ctx.font = stdFont;
+                                       ctx.fillText(pointSymbols[6], 0, 0, imageWidth);
+                                       ctx.translate(-imageWidth * 0.35, 0);
+                                       break;
+                                   case 270:
+                                       ctx.translate(imageWidth * 0.35, 0);
+                                       ctx.rotate(HALF_PI);
+                                       ctx.font = stdFont;
+                                       ctx.fillText(pointSymbols[0], 0, 0, imageWidth);
+                                       ctx.translate(-imageWidth * 0.35, 0);
+                                       break;
+                                   default:
+                                       val = (i + 90) % 360;
+                                       ctx.translate(imageWidth * 0.37, 0);
+                                       ctx.rotate(HALF_PI);
+                                       ctx.font = smlFont;
+                                       ctx.fillText(('0'.substring(val >= 100) + val), 0, 0, imageWidth);
+                                       ctx.translate(-imageWidth * 0.37, 0);
+                                   }
+                               } else {
+                                   val = (i + 90) % 360;
+                                   ctx.translate(imageWidth * 0.37, 0);
+                                   ctx.rotate(HALF_PI);
+                                   ctx.font = smlFont;
+                                   ctx.fillText(('0'.substring(val >= 100) + val), 0, 0, imageWidth);
+                                   ctx.translate(-imageWidth * 0.37, 0);
+                               }
+                               ctx.restore();
+                               ctx.rotate(angleStep * 10);
+                           }
+
+                       }
+                       ctx.translate(-centerX, -centerY);
+                       ctx.restore();
+                   };
+
+
+            return {
+              init : function() {
+//                  drawRoseImage(localCtx, size / 2, size / 2, size, size, steelseries.BackgroundColor.DARK_GRAY);
+                  drawTickmarksImage(localCtx);
+
+              },
+              draw: function() {
+                  preRotate(getAngle(heading));
+                  mainCtx.drawImage(buffer, 0, 0);
+                  mainCtx.restore();
+              }
+            }
+
+        };
+
+        var preRotate = function(angle) {
+            mainCtx.save();
+            mainCtx.translate(centerX, centerY);
+            mainCtx.rotate(-angle);
+            mainCtx.translate(-centerX, -centerY);
+        }
+
+        var getAngle = function(value) {
+          return HALF_PI + value * angleStep - HALF_PI;
+        }
+
+
         var layers = [
             new Frame(size),
-            new Background(size)
+            new Background(size),
+            new CompassBackground(size)
 
         ];
 
@@ -96,33 +317,13 @@ var steelseries = (function () {
                 layers[i].draw();
             }
 
-            // Draw buffered image to visible canvas
-//            mainCtx.drawImage(backgroundBuffer, 0, 0);
-
-
-//            angle = rotationOffset + HALF_PI + (value - minValue) * angleStep;
-
-            // Define rotation center
-//            mainCtx.save();
-//            mainCtx.translate(centerX, centerY);
-//            mainCtx.rotate(angle);
-//            mainCtx.translate(-centerX, -centerY);
-            // Set the pointer shadow params
-//            mainCtx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-//            mainCtx.shadowOffsetX = mainCtx.shadowOffsetY = shadowOffset;
-//            mainCtx.shadowBlur = shadowOffset * 2;
-            // Draw the pointer
-//            mainCtx.drawImage(pointerBuffer, 0, 0);
-            // Undo the translations & shadow settings
-//            mainCtx.restore();
-
-            // Draw foreground
-//            if (foregroundVisible) {
-//                mainCtx.drawImage(foregroundBuffer, 0, 0);
-//            }
-
             repainting = false;
         };
+
+        this.setHeading = function(value) {
+            heading = value;
+            this.repaint();
+        }
 
 
         this.repaint();
