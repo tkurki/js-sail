@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html manifest="demo.manifest"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Canvas Steel</title>
+</head>
+<body onload="init();" style="background-color:#84a5ed">
+    <table>
+        <tbody><tr>
+            <td width="100%">
+
+            </td>
+        </tr>
+        <tr>
+            <td width="100%">
+                <canvas id="canvasRadial1" width="201" height="201">No canvas in your browser...sorry...</canvas>
+                <canvas id="canvasRadial2" width="201" height="201"></canvas>
+                <canvas id="canvasRadial3" width="201" height="201"></canvas>
+                <canvas id="canvasRadial4" width="201" height="201"></canvas>
+            </td>
+        </tr>
+        <tr>
+            <td width="100%">
+                <canvas id="canvasRadial5" width="201" height="201"></canvas>
+                <canvas id="canvasRadial6" width="201" height="201"></canvas>
+                <canvas id="canvasRadial7" width="201" height="201"></canvas>
+                <canvas id="canvasRadial8" width="201" height="201"></canvas>
+            </td>
+        </tr>
+        <tr>
+            <td width="100%">
+                <canvas id="canvasVertical1" width="201" height="201"></canvas>
+                <canvas id="canvasVertical2" width="201" height="201"></canvas>
+                <canvas id="canvasVertical3" width="201" height="201"></canvas>
+                <canvas id="canvasRadial9" width="201" height="201"></canvas>
+            </td>
+        </tr>
+    </tbody></table>
+
+
+<script>
+    var radial1,
+        radial2,
+        radial3,
+        radial4,
+        radial5,
+        radial6,
+        radial7,
+        radial8,
+        radial9,
+        vertical1,
+        vertical2,
+        vertical3,
+        odoValue = 99998.2;
+
+
+    function init() {
+        // Define some sections
+        var sections = [steelseries.Section(0, 25, 'rgba(0, 0, 220, 0.3)'),
+                        steelseries.Section(25, 50, 'rgba(0, 220, 0, 0.3)'),
+                        steelseries.Section(50, 75, 'rgba(220, 220, 0, 0.3)') ],
+
+            // Define one area
+            areas = [steelseries.Section(75, 100, 'rgba(220, 0, 0, 0.3)')],
+
+            // Define value gradient for bargraph
+            valGrad = new steelseries.gradientWrapper(  0,
+                                                        100,
+                                                        [ 0, 0.33, 0.66, 0.85, 1],
+                                                        [ new steelseries.rgbaColor(0, 0, 200, 1),
+                                                          new steelseries.rgbaColor(0, 200, 0, 1),
+                                                          new steelseries.rgbaColor(200, 200, 0, 1),
+                                                          new steelseries.rgbaColor(200, 0, 0, 1),
+                                                          new steelseries.rgbaColor(200, 0, 0, 1) ]);
+
+        // Initialzing gauges
+        radial1 = new steelseries.Radial('canvasRadial1', {
+                            gaugeType: steelseries.GaugeType.TYPE1,
+                            size: 201,
+                            section: sections,
+                            area: areas,
+                            titleString: 'Title',
+                            unitString: 'Type1',
+                            threshold: 60,
+                            lcdVisible: true
+                        });
+
+        radial2 = new steelseries.Radial('canvasRadial2', {
+                            gaugeType: steelseries.GaugeType.TYPE2,
+                            size: 201,
+                            section: sections,
+                            area: areas,
+                            titleString: 'Title',
+                            unitString: 'Type2',
+                            threshold: 60,
+                            lcdVisible: true
+                        });
+
+        radial3 = new steelseries.Radial('canvasRadial3', {
+                            gaugeType: steelseries.GaugeType.TYPE3,
+                            size: 201,
+                            section: sections,
+                            area: areas,
+                            lcdVisible: true,
+                            maxValue: 360
+                        });
+
+        radial4 = new steelseries.Radial('canvasRadial4', {
+                            gaugeType: steelseries.GaugeType.TYPE4,
+                            size: 201,
+                            section: sections,
+                            area: areas,
+                            titleString: "Title",
+                            unitString: "Type4",
+                            threshold: 50,
+                            lcdVisible: true
+                        });
+
+        radial5 = new steelseries.RadialBargraph('canvasRadial5', {
+                            gaugeType: steelseries.GaugeType.TYPE1,
+                            size: 201,
+                            titleString: 'Title',
+                            unitString: 'Type1',
+                            lcdVisible: true
+                        });
+
+        radial6 = new steelseries.RadialBargraph('canvasRadial6', {
+                            gaugeType: steelseries.GaugeType.TYPE2,
+                            size: 201,
+                            titleString: 'Title',
+                            unitString: 'Type2',
+                            lcdVisible: true
+                        });
+
+        radial7 = new steelseries.RadialBargraph('canvasRadial7', {
+                            gaugeType: steelseries.GaugeType.TYPE3,
+                            size: 201,
+                            section: sections,
+                            useSectionColors: true,
+                            titleString: 'Title',
+                            unitString: 'Section',
+                            lcdVisible: true
+                        });
+
+        radial8 = new steelseries.RadialBargraph('canvasRadial8', {
+                            gaugeType: steelseries.GaugeType.TYPE4,
+                            size: 201,
+                            valueGradient: valGrad,
+                            useValueGradient: true,
+                            titleString: 'Title',
+                            unitString: 'Gradient',
+                            lcdVisible: true
+                        });
+
+        radial9 = new steelseries.Radial('canvasRadial9', {
+                            gaugeType: steelseries.GaugeType.TYPE4,
+                            size: 201,
+                            section: sections,
+                            area: areas,
+                            titleString: "Title",
+                            unitString: "Type4",
+                            threshold: 50,
+                            lcdVisible: true,
+                            lcdDecimals: 1,
+                            useOdometer: true,
+                            odometerParams: {digits: 5, value: odoValue}
+                            });
+
+        vertical1 = new steelseries.RadialVertical('canvasVertical1', {
+                            titleString: 'Title',
+                            unitString: 'North',
+                            size: 201
+                        });
+
+        vertical2 = new steelseries.RadialVertical('canvasVertical2', {
+                            titleString: 'Title',
+                            unitString: 'West',
+                            size: 201,
+                            orientation: steelseries.Orientation.WEST
+                        });
+
+        vertical3 = new steelseries.RadialVertical('canvasVertical3', {
+                            titleString: 'Title',
+                            unitString: 'East',
+                            size: 201,
+                            orientation: steelseries.Orientation.EAST
+                        });
+
+        // Start the random update
+        radial9.setOdoValue(odoValue);
+        setInterval(function(){ setRandomValue(radial1, 100); }, 4200);
+        setInterval(function(){ setRandomValue(radial2, 100); }, 4300);
+        setInterval(function(){ setRandomValue(radial3, 100); }, 4400);
+        setInterval(function(){ setRandomValue(radial4, 100); }, 4500);
+        setInterval(function(){ setRandomValue(radial5, 100); }, 4600);
+        setInterval(function(){ setRandomValue(radial6, 100); }, 4700);
+        setInterval(function(){ setRandomValue(radial7, 100); }, 4800);
+        setInterval(function(){ setRandomValue(radial8, 100); }, 4900);
+        setInterval(function(){ setRandomValue(radial9, 100); }, 4850);
+        setInterval(function(){ setOdometer(radial9); }, 100);
+        setInterval(function(){ setRandomValue(vertical1, 100); }, 4100);
+        setInterval(function(){ setRandomValue(vertical2, 100); }, 4100);
+        setInterval(function(){ setRandomValue(vertical3, 100); }, 4000);
+    }
+
+    function setRandomValue(gauge, range) {
+        gauge.setValueAnimated(Math.random() * range);
+    }
+
+    function setDirRandomValue(gauge, range) {
+        gauge.setValueAnimatedLatest(Math.random() * range);
+        gauge.setValueAnimatedAverage(Math.random() * range);
+    }
+
+    function setHorRandomValue(gauge) {
+        var pitch = Math.random() * 100 - 50,
+            roll = Math.random() * 120 - 60;
+        gauge.setPitchAnimated(pitch);
+        gauge.setRollAnimated(roll);
+    }
+
+    function setOdometer(gauge) {
+        odoValue += 0.02
+        gauge.setOdoValue(odoValue);
+    }
+
+ </script>
+<script src="tween.js"></script>
+<script src="steelseries.js"></script>
+</body></html>
