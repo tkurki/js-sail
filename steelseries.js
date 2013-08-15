@@ -48,12 +48,13 @@ var steelseries = (function () {
 
         var initialized = false;
 
-        var heading = 45;
-        var portActual = 50;
-        var stbrdActual = 135;
+        var heading = 355;
+        var portActual = 13;
+        var stbrdActual = 103;
+        var bearingToMark = 55;
         var portAndStbrdSections = [
             section(10,30, steelseries.ColorDef.RED.veryLight.getHexColor()),
-            section(60,75, steelseries.ColorDef.GREEN.veryLight.getHexColor())
+            section(100,120, steelseries.ColorDef.GREEN.veryLight.getHexColor())
         ]
 
         var backgroundColor = steelseries.BackgroundColor.DARK_GRAY;
@@ -274,6 +275,36 @@ var steelseries = (function () {
                        ctx.restore();
                    };
 
+            var createThresholdImage = function () {
+                var thresholdBuffer = doc.createElement('canvas');
+                thresholdBuffer.width = Math.ceil(size * 0.046728);
+                thresholdBuffer.height = Math.ceil(thresholdBuffer.width * 0.9);
+                var thresholdCtx = thresholdBuffer.getContext('2d');
+
+                thresholdCtx.save();
+                var gradThreshold = thresholdCtx.createLinearGradient(0, 0.1, 0, thresholdBuffer.height * 0.9);
+                gradThreshold.addColorStop(0, '#520000');
+                gradThreshold.addColorStop(0.3, '#fc1d00');
+                gradThreshold.addColorStop(0.59, '#fc1d00');
+                gradThreshold.addColorStop(1, '#520000');
+                thresholdCtx.fillStyle = gradThreshold;
+
+                thresholdCtx.beginPath();
+                thresholdCtx.moveTo(thresholdBuffer.width * 0.5, 0.1);
+                thresholdCtx.lineTo(thresholdBuffer.width * 0.9, thresholdBuffer.height * 0.9);
+                thresholdCtx.lineTo(thresholdBuffer.width * 0.1, thresholdBuffer.height * 0.9);
+                thresholdCtx.lineTo(thresholdBuffer.width * 0.5, 0.1);
+                thresholdCtx.closePath();
+
+                thresholdCtx.fill();
+                thresholdCtx.strokeStyle = '#FFFFFF';
+                thresholdCtx.stroke();
+
+                thresholdCtx.restore();
+
+                return thresholdBuffer;
+            };
+
             var drawSections = function(sections) {
                 for (var i=0;i < sections.length;i++) {
                   drawAreaSectionImage(mainCtx, sections[i].start, sections[i].stop, sections[i].color, true);
@@ -340,6 +371,9 @@ var steelseries = (function () {
                   mainCtx.restore()
                   preRotate(getAngle(stbrdActual));
                   mainCtx.drawImage(portAndStbrdBuffers[1], 0, 0);
+                  mainCtx.restore();
+                  preRotate(getAngle(bearingToMark));
+                  mainCtx.drawImage(createThresholdImage(), imageWidth * 0.475, imageHeight * 0.13);
                   mainCtx.restore();
                   mainCtx.restore();
               }
